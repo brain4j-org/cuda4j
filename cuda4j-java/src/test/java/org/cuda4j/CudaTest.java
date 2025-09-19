@@ -4,10 +4,10 @@ import org.cuda4j.buffer.CudaBuffer;
 import org.cuda4j.buffer.CudaPointer;
 import org.cuda4j.context.CudaContext;
 import org.cuda4j.context.CudaFunction;
+import org.cuda4j.context.CudaStream;
 import org.cuda4j.device.CudaDevice;
 import org.cuda4j.device.CudaModule;
 
-import java.lang.foreign.MemorySegment;
 import java.util.Arrays;
 
 public class CudaTest {
@@ -23,6 +23,7 @@ public class CudaTest {
         
         CudaModule module = CudaModule.load("resources/vector_add.ptx");
         CudaFunction function = module.getFunction("vecAdd");
+        CudaStream stream = CudaStream.create();
         
         int N = 1024;
         float[] A = new float[N];
@@ -30,32 +31,25 @@ public class CudaTest {
         Arrays.fill(A, 1.0f);
         Arrays.fill(B, 2.0f);
         
-        CudaBuffer dA = CudaBuffer.allocate(A);
-        CudaBuffer dB = CudaBuffer.allocate(B);
-        CudaBuffer dC = CudaBuffer.allocate(N * Float.BYTES);
+        CudaBuffer deviceA = CudaBuffer.allocate(A, stream);
+        CudaBuffer deviceB = CudaBuffer.allocate(B, stream);
+        CudaBuffer deviceC = CudaBuffer.allocate(N * Float.BYTES);
         
         int blockSize = 256;
         int gridSize = (N + blockSize - 1) / blockSize;
 
         CudaPointer args = CudaPointer.from(
-            CudaPointer.fromBuffer(dA),
-            CudaPointer.fromBuffer(dB),
-            CudaPointer.fromBuffer(dC),
+            CudaPointer.fromBuffer(deviceA),
+            CudaPointer.fromBuffer(deviceB),
+            CudaPointer.fromBuffer(deviceC),
             CudaPointer.fromInt(N)
         );
         
-        function.launch(
-            gridSize, 1, 1,
-            blockSize, 1, 1,
-            0,
-            MemorySegment.NULL,
-            args.segment()
-        );
-        context.synchronize();
+        function.launch(gridSize, 1, 1, blockSize, 1, 1, 0, stream, args);
         
-        float[] hC = new float[N];
-        dC.copyToHost(hC);
+        float[] hostC = new float[N];
+        deviceC.copyToHost(hostC);
         
-        System.out.println("Vector add result: " + Arrays.toString(Arrays.copyOf(hC, 10)));
+        System.out.println("Vector add result: " + Arrays.toString(Arrays.copyOf(hostC, 10)));
     }
 }

@@ -1,6 +1,7 @@
 package org.cuda4j.context;
 
 import org.cuda4j.CudaObject;
+import org.cuda4j.buffer.CudaPointer;
 
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;
@@ -26,16 +27,16 @@ public record CudaFunction(MemorySegment handle) implements CudaObject {
         int gridX, int gridY, int gridZ,
         int blockX, int blockY, int blockZ,
         int sharedMemBytes,
-        MemorySegment stream,
-        MemorySegment kernelParams
+        CudaStream stream,
+        CudaPointer kernelParams
     ) throws Throwable {
         return (int) CUDA_LAUNCH_KERNEL.invoke(
             handle,
             gridX, gridY, gridZ,
             blockX, blockY, blockZ,
             sharedMemBytes,
-            stream == null ? MemorySegment.NULL : stream,
-            kernelParams == null ? MemorySegment.NULL : kernelParams
+            stream == null ? MemorySegment.NULL : stream.handle(),
+            kernelParams == null ? MemorySegment.NULL : kernelParams.segment()
         );
     }
 }

@@ -67,6 +67,12 @@ public record CudaBuffer(MemorySegment handle, int length) implements CudaObject
         return buffer;
     }
     
+    public static CudaBuffer allocate(float[] data, CudaStream stream) throws Throwable {
+        CudaBuffer buffer = allocate(data.length * 4);
+        buffer.copyToDeviceAsync(data, stream);
+        return buffer;
+    }
+    
     public static CudaBuffer allocate(int size) throws Throwable {
         MemorySegment ptr = (MemorySegment) CUDA_MEM_ALLOC.invoke(size);
         
@@ -125,6 +131,17 @@ public record CudaBuffer(MemorySegment handle, int length) implements CudaObject
         }
     }
     
+    public void copyToDeviceAsync(float[] data, CudaStream stream) throws Throwable {
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_FLOAT, data);
+            int res = (int) CUDA_MEMCPY_HTOD_ASYNC.invoke(handle, host, data.length, stream.handle());
+            
+            if (res != 0) {
+                throw new RuntimeException("cuMemcpyHtoDAsync failed: " + res);
+            }
+        }
+    }
+    
     public void copyToDeviceAsync(byte[] data, CudaStream stream) throws Throwable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_BYTE, data);
@@ -133,6 +150,19 @@ public record CudaBuffer(MemorySegment handle, int length) implements CudaObject
             if (res != 0) {
                 throw new RuntimeException("cuMemcpyHtoDAsync failed: " + res);
             }
+        }
+    }
+    
+    public void copyToHostAsync(float[] data, CudaStream stream) throws Throwable {
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment host = arena.allocate(ValueLayout.JAVA_FLOAT, data.length);
+            int res = (int) CUDA_MEMCPY_DTOH_ASYNC.invoke(host, handle, data.length, stream.handle());
+            
+            if (res != 0) {
+                throw new RuntimeException("cuMemcpyDtoHAsync failed: " + res);
+            }
+            
+            MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, data.length);
         }
     }
     
