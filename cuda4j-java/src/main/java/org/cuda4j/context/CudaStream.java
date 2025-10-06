@@ -48,4 +48,12 @@ public record CudaStream(MemorySegment handle) implements CudaObject {
         int res = (int) CUDA_STREAM_QUERY.invoke();
         return res == 0;
     }
+
+    public void destroy() throws Throwable {
+        int res = (int) CUDA_STREAM_DESTROY.invoke(handle);
+
+        if (res != 0) {
+            throw new RuntimeException("cuStreamDestroy_v2 failed: " + res);
+        }
+    }
 }
