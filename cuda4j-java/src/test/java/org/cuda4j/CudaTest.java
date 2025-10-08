@@ -31,8 +31,10 @@ public class CudaTest {
         Arrays.fill(A, 1.0f);
         Arrays.fill(B, 2.0f);
         
-        CudaBuffer deviceA = CudaBuffer.allocate(A, stream);
-        CudaBuffer deviceB = CudaBuffer.allocate(B, stream);
+        int size = N * Float.BYTES;
+        
+        CudaBuffer deviceA = CudaBuffer.allocate(A, size);
+        CudaBuffer deviceB = CudaBuffer.allocate(B, size);
         CudaBuffer deviceC = CudaBuffer.allocate(N * Float.BYTES);
         
         int blockSize = 256;

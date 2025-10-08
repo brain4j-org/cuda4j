@@ -4,3 +4,7 @@ plugins {
 
 group = 'org.cuda4j'
 version = '1.0.0'
+
+test {
+    failOnNoDiscoveredTests = false
+}
