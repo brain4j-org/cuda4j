@@ -46,4 +46,16 @@ public class Cuda4J {
     public static int getDeviceCount() throws Throwable {
         return (int) CUDA_DEVICE_COUNT.invokeExact();
     }
+    
+    public static void unchecked(ThrowableRunnable runnable) {
+        try {
+            runnable.run();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public interface ThrowableRunnable {
+        void run() throws Exception;
+    }
 }
