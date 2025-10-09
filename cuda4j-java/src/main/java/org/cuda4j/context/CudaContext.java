@@ -52,4 +52,10 @@ public record CudaContext(MemorySegment handle) implements CudaObject {
             throw new RuntimeException("cuCtxSynchronize failed, error " + res);
         }
     }
+    
+    @Override
+    public void release() throws Throwable {
+        CUDA_DESTROY_CONTEXT.invoke(handle);
+        CudaObject.super.release();
+    }
 }
