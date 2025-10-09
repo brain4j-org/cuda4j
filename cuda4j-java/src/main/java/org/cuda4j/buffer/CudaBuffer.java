@@ -14,7 +14,7 @@ public record CudaBuffer(MemorySegment handle, long length) implements CudaObjec
     );
     public static final MethodHandle CUDA_MEM_ALLOC = LINKER.downcallHandle(
         LOOKUP.findOrThrow("cuda_mem_alloc"),
-        FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.JAVA_INT)
+        FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.JAVA_LONG)
     );
     public static final MethodHandle CUDA_MEM_FREE = LINKER.downcallHandle(
         LOOKUP.findOrThrow("cuda_mem_free"),
@@ -104,7 +104,7 @@ public record CudaBuffer(MemorySegment handle, long length) implements CudaObjec
     public void copyToDevice(byte[] data) throws Throwable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_BYTE, data);
-            int res = (int) CUDA_MEMCPY_HTOD.invoke(handle, host, data.length);
+            int res = (int) CUDA_MEMCPY_HTOD.invoke(handle, host, (long) data.length);
             
             if (res != 0) {
                 throw new RuntimeException("cuMemcpyHtoD failed: " + res);
@@ -115,7 +115,7 @@ public record CudaBuffer(MemorySegment handle, long length) implements CudaObjec
     public void copyToDevice(int[] data) throws Throwable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_INT, data);
-            int res = (int) CUDA_MEMCPY_HTOD.invoke(handle, host, data.length);
+            int res = (int) CUDA_MEMCPY_HTOD.invoke(handle, host, (long) data.length);
             
             if (res != 0) {
                 throw new RuntimeException("cuMemcpyHtoD failed: " + res);
@@ -126,7 +126,7 @@ public record CudaBuffer(MemorySegment handle, long length) implements CudaObjec
     public void copyToDevice(float[] data) throws Throwable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_FLOAT, data);
-            int res = (int) CUDA_MEMCPY_HTOD.invoke(handle, host, data.length);
+            int res = (int) CUDA_MEMCPY_HTOD.invoke(handle, host, (long) data.length);
             
             if (res != 0) {
                 throw new RuntimeException("cuMemcpyHtoD failed: " + res);
@@ -137,40 +137,40 @@ public record CudaBuffer(MemorySegment handle, long length) implements CudaObjec
     // copy to host
     public void copyToHost(byte[] data) throws Throwable {
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment host = arena.allocate(ValueLayout.JAVA_BYTE, data.length);
-            int res = (int) CUDA_MEMCPY_DTOH.invoke(host, handle, data.length);
+            MemorySegment host = arena.allocate(ValueLayout.JAVA_BYTE, (long) data.length);
+            int res = (int) CUDA_MEMCPY_DTOH.invoke(host, handle, (long) data.length);
             
             if (res != 0) {
                 throw new RuntimeException("cuMemcpyDtoH failed: " + res);
             }
             
-            MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, data.length);
+            MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, (long) data.length);
         }
     }
     
     public void copyToHost(int[] data) throws Throwable {
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment host = arena.allocate(ValueLayout.JAVA_INT, data.length);
-            int res = (int) CUDA_MEMCPY_DTOH.invoke(host, handle, data.length * Integer.BYTES);
+            MemorySegment host = arena.allocate(ValueLayout.JAVA_INT, (long) data.length);
+            int res = (int) CUDA_MEMCPY_DTOH.invoke(host, handle, (long) data.length * Integer.BYTES);
             
             if (res != 0) {
                 throw new RuntimeException("cuMemcpyDtoH failed: " + res);
             }
             
-            MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, (long) data.length * Integer.BYTES);
+            MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, (long) (long) data.length * Integer.BYTES);
         }
     }
     
     public void copyToHost(float[] data) throws Throwable {
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment host = arena.allocate(ValueLayout.JAVA_FLOAT, data.length);
-            int res = (int) CUDA_MEMCPY_DTOH.invoke(host, handle, data.length);
+            MemorySegment host = arena.allocate(ValueLayout.JAVA_FLOAT, (long) data.length);
+            int res = (int) CUDA_MEMCPY_DTOH.invoke(host, handle, (long) data.length);
             
             if (res != 0) {
                 throw new RuntimeException("cuMemcpyDtoH failed: " + res);
             }
             
-            MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, data.length);
+            MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, (long) data.length);
         }
     }
     
@@ -178,7 +178,7 @@ public record CudaBuffer(MemorySegment handle, long length) implements CudaObjec
     public void copyToDeviceAsync(byte[] data, CudaStream stream) throws Throwable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_BYTE, data);
-            int res = (int) CUDA_MEMCPY_HTOD_ASYNC.invoke(handle, host, data.length, stream.handle());
+            int res = (int) CUDA_MEMCPY_HTOD_ASYNC.invoke(handle, host, (long) data.length, stream.handle());
             
             if (res != 0) {
                 throw new RuntimeException("cuMemcpyHtoDAsync failed: " + res);
@@ -189,7 +189,7 @@ public record CudaBuffer(MemorySegment handle, long length) implements CudaObjec
     public void copyToDeviceAsync(int[] data, CudaStream stream) throws Throwable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_INT, data);
-            int res = (int) CUDA_MEMCPY_HTOD_ASYNC.invoke(handle, host, data.length, stream.handle());
+            int res = (int) CUDA_MEMCPY_HTOD_ASYNC.invoke(handle, host, (long) data.length, stream.handle());
             
             if (res != 0) {
                 throw new RuntimeException("cuMemcpyHtoDAsync failed: " + res);
@@ -200,7 +200,7 @@ public record CudaBuffer(MemorySegment handle, long length) implements CudaObjec
     public void copyToDeviceAsync(float[] data, CudaStream stream) throws Throwable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_FLOAT, data);
-            int res = (int) CUDA_MEMCPY_HTOD_ASYNC.invoke(handle, host, data.length, stream.handle());
+            int res = (int) CUDA_MEMCPY_HTOD_ASYNC.invoke(handle, host, (long) data.length, stream.handle());
             
             if (res != 0) {
                 throw new RuntimeException("cuMemcpyHtoDAsync failed: " + res);
@@ -211,38 +211,38 @@ public record CudaBuffer(MemorySegment handle, long length) implements CudaObjec
     // async copy to host
     public void copyToHostAsync(byte[] data, CudaStream stream) throws Throwable {
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment host = arena.allocate(ValueLayout.JAVA_BYTE, data.length);
-            int res = (int) CUDA_MEMCPY_DTOH_ASYNC.invoke(host, handle, data.length, stream.handle());
+            MemorySegment host = arena.allocate(ValueLayout.JAVA_BYTE, (long) data.length);
+            int res = (int) CUDA_MEMCPY_DTOH_ASYNC.invoke(host, handle, (long) data.length, stream.handle());
             
             if (res != 0) {
                 throw new RuntimeException("cuMemcpyDtoHAsync failed: " + res);
             }
             
-            MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, data.length);
+            MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, (long) data.length);
         }
     }
     
     public void copyToHostAsync(int[] data, CudaStream stream) throws Throwable {
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment host = arena.allocate(ValueLayout.JAVA_INT, data.length);
-            int res = (int) CUDA_MEMCPY_DTOH_ASYNC.invoke(host, handle, data.length * Integer.BYTES, stream.handle());
+            MemorySegment host = arena.allocate(ValueLayout.JAVA_INT, (long) data.length);
+            int res = (int) CUDA_MEMCPY_DTOH_ASYNC.invoke(host, handle, (long) data.length * Integer.BYTES, stream.handle());
             if (res != 0) {
                 throw new RuntimeException("cuMemcpyDtoHAsync failed: " + res);
             }
-            MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, data.length * Integer.BYTES);
+            MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, (long) data.length * Integer.BYTES);
         }
     }
     
     public void copyToHostAsync(float[] data, CudaStream stream) throws Throwable {
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment host = arena.allocate(ValueLayout.JAVA_FLOAT, data.length);
-            int res = (int) CUDA_MEMCPY_DTOH_ASYNC.invoke(host, handle, data.length, stream.handle());
+            MemorySegment host = arena.allocate(ValueLayout.JAVA_FLOAT, (long) data.length);
+            int res = (int) CUDA_MEMCPY_DTOH_ASYNC.invoke(host, handle, (long) data.length, stream.handle());
             
             if (res != 0) {
                 throw new RuntimeException("cuMemcpyDtoHAsync failed: " + res);
             }
             
-            MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, data.length);
+            MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, (long) data.length);
         }
     }
     
