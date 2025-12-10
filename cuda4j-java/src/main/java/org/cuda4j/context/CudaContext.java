@@ -11,19 +11,19 @@ import java.lang.invoke.MethodHandle;
 public record CudaContext(MemorySegment handle) implements CudaObject {
     
     public static final MethodHandle CUDA_CREATE_CONTEXT = LINKER.downcallHandle(
-        LOOKUP.findOrThrow("cuda_create_context"),
+        LOOKUP.find("cuda_create_context").orElse(null),
         FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
     );
     public static final MethodHandle CUDA_DESTROY_CONTEXT = LINKER.downcallHandle(
-        LOOKUP.findOrThrow("cuda_destroy_context"),
+        LOOKUP.find("cuda_destroy_context").orElse(null),
         FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
     );
     public static final MethodHandle CUDA_SYNC_CONTEXT = LINKER.downcallHandle(
-        LOOKUP.findOrThrow("cuda_sync_context"),
+        LOOKUP.find("cuda_sync_context").orElse(null),
         FunctionDescriptor.of(ValueLayout.JAVA_INT)
     );
     public static final MethodHandle CUDA_CONTEXT_SET_CURRENT = LINKER.downcallHandle(
-        LOOKUP.findOrThrow("cuda_context_set_current"),
+        LOOKUP.find("cuda_context_set_current").orElse(null),
         FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS)
     );
     
@@ -37,20 +37,24 @@ public record CudaContext(MemorySegment handle) implements CudaObject {
         return new CudaContext(ctx);
     }
     
-    public void setCurrent() throws Throwable {
+    public CudaContext setCurrent() throws Throwable {
         int res = (int) CUDA_CONTEXT_SET_CURRENT.invoke(handle);
         
         if (res != 0) {
             throw new RuntimeException("cuCtxSetCurrent failed: " + res);
         }
+        
+        return this;
     }
     
-    public void synchronize() throws Throwable {
+    public CudaContext synchronize() throws Throwable {
         int res = (int) CUDA_SYNC_CONTEXT.invoke();
         
         if (res != 0) {
             throw new RuntimeException("cuCtxSynchronize failed, error " + res);
         }
+        
+        return this;
     }
     
     @Override

@@ -5,20 +5,33 @@ import java.lang.invoke.MethodHandle;
 
 public interface CudaObject {
     
-    long LONG_SIZE = Long.SIZE / 8; // 8
-    long DOUBLE_SIZE = Double.SIZE / 8; // 8
-    long INT_SIZE = Integer.SIZE / 8; // 4
-    long FLOAT_SIZE = Float.SIZE / 8; // 4
-    long SHORT_SIZE = Short.SIZE / 8; // 2
-    long CHAR_SIZE = Character.SIZE / 8;
-    long BYTE_SIZE = Byte.SIZE / 8; // 1
-    Linker LINKER = Cuda4J.LINKER;
-    SymbolLookup LOOKUP = Cuda4J.LOOKUP;
+    Linker LINKER = CUDA.LINKER;
+    SymbolLookup LOOKUP = CUDA.LOOKUP;
     MethodHandle CUDA_RELEASE_OBJECT = LINKER.downcallHandle(
-        LOOKUP.findOrThrow("cuda_release_object"),
+        LOOKUP.find("cuda_release_object").orElse(null),
         FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
     );
-
+    
+    default long bytesOf(byte[] array) {
+        return array.length;
+    }
+    
+    default long bytesOf(int[] array) {
+        return (long) array.length * Integer.BYTES;
+    }
+    
+    default long bytesOf(float[] array) {
+        return (long) array.length * Float.BYTES;
+    }
+    
+    default long bytesOf(double[] array) {
+        return (long) array.length * Double.BYTES;
+    }
+    
+    default long bytesOf(short[] array) {
+        return (long) array.length * Short.BYTES;
+    }
+    
     default void release() throws Throwable {
         CUDA_RELEASE_OBJECT.invokeExact(handle());
     }

@@ -5,6 +5,31 @@ plugins {
 group = 'org.cuda4j'
 version = '1.0.0'
 
-test {
-    failOnNoDiscoveredTests = false
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.jocl:jocl:2.0.5'
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(22))
+    }
+
+    sourceCompatibility = JavaVersion.VERSION_22
+    targetCompatibility = JavaVersion.VERSION_22
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += "--enable-preview"
+}
+
+tasks.withType(Test).configureEach {
+    jvmArgs += "--enable-preview"
+}
+
+tasks.withType(JavaExec).configureEach {
+    jvmArgs += "--enable-preview"
 }

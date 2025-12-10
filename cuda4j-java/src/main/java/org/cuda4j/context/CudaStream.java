@@ -9,32 +9,18 @@ import java.lang.invoke.MethodHandle;
 
 public record CudaStream(MemorySegment handle) implements CudaObject {
     
-    public static final MethodHandle CUDA_STREAM_CREATE = LINKER.downcallHandle(
-        LOOKUP.findOrThrow("cuda_stream_create"),
-        FunctionDescriptor.of(ValueLayout.ADDRESS)
-    );
     public static final MethodHandle CUDA_STREAM_DESTROY = LINKER.downcallHandle(
-        LOOKUP.findOrThrow("cuda_stream_destroy"),
+        LOOKUP.find("cuda_stream_destroy").orElse(null),
         FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS)
     );
     public static final MethodHandle CUDA_STREAM_SYNC = LINKER.downcallHandle(
-        LOOKUP.findOrThrow("cuda_stream_sync"),
+        LOOKUP.find("cuda_stream_sync").orElse(null),
         FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS)
     );
     public static final MethodHandle CUDA_STREAM_QUERY = LINKER.downcallHandle(
-        LOOKUP.findOrThrow("cuda_stream_query"),
+        LOOKUP.find("cuda_stream_query").orElse(null),
         FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS)
     );
-    
-    public static CudaStream create() throws Throwable {
-        MemorySegment ptr = (MemorySegment) CUDA_STREAM_CREATE.invoke();
-        
-        if (ptr == null || ptr.address() == 0) {
-            throw new RuntimeException("Failed to create CUDA stream");
-        }
-        
-        return new CudaStream(ptr);
-    }
     
     public void sync() throws Throwable {
         int res = (int) CUDA_STREAM_SYNC.invoke(handle);

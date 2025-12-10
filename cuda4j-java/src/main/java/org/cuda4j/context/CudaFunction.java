@@ -11,7 +11,7 @@ import java.lang.invoke.MethodHandle;
 public record CudaFunction(MemorySegment handle) implements CudaObject {
     
     private static final MethodHandle CUDA_LAUNCH_KERNEL = LINKER.downcallHandle(
-        LOOKUP.findOrThrow("cuda_launch_kernel"),
+        LOOKUP.find("cuda_launch_kernel").orElse(null),
         FunctionDescriptor.of(
             ValueLayout.JAVA_INT, // return
             ValueLayout.ADDRESS, // function
