@@ -3,7 +3,10 @@ package org.cuda4j.buffer;
 import org.cuda4j.CudaObject;
 import org.cuda4j.context.CudaStream;
 
-import java.lang.foreign.*;
+import java.lang.foreign.Arena;
+import java.lang.foreign.FunctionDescriptor;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
 
 public record CudaBuffer(MemorySegment handle, long length) implements CudaObject {
