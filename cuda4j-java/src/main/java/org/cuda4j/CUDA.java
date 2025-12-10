@@ -103,7 +103,7 @@ public class CUDA {
         }
     }
     
-    public static CudaBuffer allocate(long size) throws Throwable {
+    public static CudaBuffer allocateBytes(long size) throws Throwable {
         MemorySegment ptr = (MemorySegment) CUDA_MEM_ALLOC.invoke(size);
         
         if (ptr == null || ptr.address() == 0) {
@@ -113,44 +113,44 @@ public class CUDA {
         return new CudaBuffer(ptr, size);
     }
     
-    public static CudaBuffer allocateBuffer(float[] data, long size, CudaStream stream) throws Throwable {
-        CudaBuffer buffer = allocate(size);
+    public static CudaBuffer allocateFor(float[] data, long size, CudaStream stream) throws Throwable {
+        CudaBuffer buffer = allocateBytes(size);
         buffer.copyToDeviceAsync(data, stream);
         return buffer;
     }
     
-    public static CudaBuffer allocateBuffer(float[] data, long size) throws Throwable {
-        CudaBuffer buffer = allocate(size);
+    public static CudaBuffer allocateFor(float[] data, long size) throws Throwable {
+        CudaBuffer buffer = allocateBytes(size);
         buffer.copyToDevice(data);
         return buffer;
     }
     
-    public static CudaBuffer allocateBuffer(float[] data, CudaStream stream) throws Throwable {
-        return allocateBuffer(data, (long) data.length * Float.SIZE, stream);
+    public static CudaBuffer allocateFor(float[] data, CudaStream stream) throws Throwable {
+        return allocateFor(data, (long) data.length * Float.SIZE, stream);
     }
     
-    public static CudaBuffer allocateBuffer(float[] data) throws Throwable {
-        return allocateBuffer(data, (long) data.length * Float.SIZE);
+    public static CudaBuffer allocateFor(float[] data) throws Throwable {
+        return allocateFor(data, (long) data.length * Float.SIZE);
     }
     
-    public static CudaBuffer allocateBuffer(int[] data, long size, CudaStream stream) throws Throwable {
-        CudaBuffer buffer = allocate(size);
+    public static CudaBuffer allocateFor(int[] data, long size, CudaStream stream) throws Throwable {
+        CudaBuffer buffer = allocateBytes(size);
         buffer.copyToDeviceAsync(data, stream);
         return buffer;
     }
     
-    public static CudaBuffer allocateBuffer(int[] data, long size) throws Throwable {
-        CudaBuffer buffer = allocate(size);
+    public static CudaBuffer allocateFor(int[] data, long size) throws Throwable {
+        CudaBuffer buffer = allocateBytes(size);
         buffer.copyToDevice(data);
         return buffer;
     }
     
-    public static CudaBuffer allocateBuffer(int[] data, CudaStream stream) throws Throwable {
-        return allocateBuffer(data, (long) data.length * Integer.SIZE, stream);
+    public static CudaBuffer allocateFor(int[] data, CudaStream stream) throws Throwable {
+        return allocateFor(data, (long) data.length * Integer.SIZE, stream);
     }
     
-    public static CudaBuffer allocateBuffer(int[] data) throws Throwable {
-        return allocateBuffer(data, (long) data.length * Integer.SIZE);
+    public static CudaBuffer allocateFor(int[] data) throws Throwable {
+        return allocateFor(data, (long) data.length * Integer.SIZE);
     }
     
     public static SymbolLookup loadFromResources(String resourceName) {

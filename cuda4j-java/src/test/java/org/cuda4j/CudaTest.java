@@ -49,9 +49,9 @@ public class CudaTest {
             b[i] = i + 1;
         }
         
-        CudaBuffer bufA = CUDA.allocateBuffer(a, N * Float.BYTES);
-        CudaBuffer bufB = CUDA.allocateBuffer(b, N * Float.BYTES);
-        CudaBuffer bufC = CUDA.allocate(N * Float.BYTES);
+        CudaBuffer bufA = CUDA.allocateFor(a, N * Float.BYTES);
+        CudaBuffer bufB = CUDA.allocateFor(b, N * Float.BYTES);
+        CudaBuffer bufC = CUDA.allocateBytes(N * Float.BYTES);
         
         int blockSize = 256;
         int gridSize = (N + blockSize - 1) / blockSize;
