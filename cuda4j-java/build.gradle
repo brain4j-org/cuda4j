@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.jocl:jocl:2.0.5'
+    testImplementation 'org.jocl:jocl:2.0.5'
 }
 
 java {
@@ -32,4 +32,8 @@ tasks.withType(Test).configureEach {
 
 tasks.withType(JavaExec).configureEach {
     jvmArgs += "--enable-preview"
+}
+
+test {
+    failOnNoDiscoveredTests = false
 }
